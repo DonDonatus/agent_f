@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Building2 } from 'lucide-react';
-import Image from 'next/image';
 
 interface SafeImageProps {
   src: string;
@@ -26,11 +25,9 @@ export function SafeImage({
   }
 
   return (
-    <Image
+    <img
       src={src}
       alt={alt}
-      width={32}
-      height={32}
       className={className}
       onError={() => setError(true)}
     />

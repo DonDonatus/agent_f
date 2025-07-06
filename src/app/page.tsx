@@ -80,18 +80,19 @@ const SafeImage = ({
 }) => {
   const [error, setError] = useState(false);
 
-  if (error) {
+  if (error || !src || (!src.startsWith('/') && !src.startsWith('http'))) {
     return <>{fallback}</>;
   }
 
   return (
-  <Image
-    src="/vb.png"
-    alt="VB Capital"
-    width={136} // required
-    height={100} // required
-    className={className}
-  />
+    <Image
+      src={src}
+      alt={alt}
+      width={width}
+      height={height}
+      className={className}
+      onError={() => setError(true)}
+    />
   );
 };
 export default function SignInPage() {

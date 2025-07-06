@@ -1,3 +1,4 @@
+import React from 'react'; // ✅ Required for JSX in older ESLint rules
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
