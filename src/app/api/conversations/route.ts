@@ -2,8 +2,7 @@ import { prisma } from '../../../../lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]/route';
 import { NextResponse } from 'next/server';
-import type { Prisma } from '@prisma/client'; // 👈 Add this
-import type { NextRequest } from 'next/server';
+import type { Prisma } from '@prisma/client';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -17,7 +16,7 @@ interface ConversationRequestBody {
   messages: Message[];
 }
 
-export async function GET(req: Request) {
+export async function GET() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
@@ -47,8 +46,10 @@ export async function POST(req: Request) {
     minute: '2-digit',
   });
 
-  const messagesJson = messages as unknown as Prisma.InputJsonValue;
-
+  // Ensure it's never null
+  const messagesJson: Prisma.InputJsonValue = messages?.length
+    ? JSON.parse(JSON.stringify(messages))
+    : [];
 
   if (id) {
     const existing = await prisma.conversation.findUnique({

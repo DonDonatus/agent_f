@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Eye, EyeOff, Building2, Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 // Type definitions
 type Theme = 'light' | 'dark' | 'very-dark';
@@ -65,30 +66,34 @@ const getThemeClasses = (theme: Theme): ThemeClasses => {
 const SafeImage = ({
   src,
   alt,
-  fallback: Fallback,
+  fallback,
   className,
+  width = 128,
+  height = 128,
 }: {
   src: string;
   alt: string;
   fallback: React.ReactNode;
   className?: string;
+  width?: number;
+  height?: number;
 }) => {
   const [error, setError] = useState(false);
 
   if (error) {
-    return <>{Fallback}</>;
+    return <>{fallback}</>;
   }
 
   return (
-    <img
-      src={src}
-      alt={alt}
-      className={className}
-      onError={() => setError(true)}
-    />
+  <Image
+    src="/vb.png"
+    alt="VB Capital"
+    width={136} // required
+    height={100} // required
+    className={className}
+  />
   );
 };
-
 export default function SignInPage() {
   const [theme, setTheme] = useState<Theme>('light');
   const [userId, setUserId] = useState('');
@@ -317,3 +322,4 @@ export default function SignInPage() {
     </div>
   );
 }
+

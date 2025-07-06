@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, ReactNode } from 'react';
+import { useState } from 'react';
 import { Building2 } from 'lucide-react';
+import Image from 'next/image';
 
 interface SafeImageProps {
   src: string;
   alt: string;
-  fallback?: ReactNode;
+  fallback?: React.ReactNode;
   className?: string;
 }
 
@@ -15,17 +16,21 @@ export function SafeImage({
   alt,
   fallback = <Building2 className="w-5 h-5" />,
   className,
-}: SafeImageProps): React.ReactElement {
+}: SafeImageProps) {
   const [error, setError] = useState(false);
 
-  if (error) {
+  const isValidSrc = src && (src.startsWith('/') || src.startsWith('http'));
+
+  if (error || !isValidSrc) {
     return <>{fallback}</>;
   }
 
   return (
-    <img
+    <Image
       src={src}
       alt={alt}
+      width={32}
+      height={32}
       className={className}
       onError={() => setError(true)}
     />
