@@ -11,12 +11,14 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
-    "plugins": [{
-      "name": "next",
-    "skipLibCheck": true
-    }],
+    "plugins": [
+      {
+        "name": "next",
+        "skipLibCheck": true
+      }
+    ],
     "paths": {
       "@/*": ["./src/*"]
     },
@@ -25,7 +27,7 @@
     "outDir": "./dist",
     "rootDir": ".",
     "noEmit": false,
-    "types": ["next-auth"]
+    "types": ["react", "react-dom", "next-auth"]
   },
   "include": [
     "next-env.d.ts",

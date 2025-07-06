@@ -1,9 +1,7 @@
-// src/app/api/auth/[...nextauth]/authOptions.ts
 import CredentialsProvider from 'next-auth/providers/credentials';
-import type { NextAuthOptions } from 'next-auth';
-import type { JWT } from 'next-auth/jwt';
+import type { NextAuthOptions, User, Session } from 'next-auth';
 import { prisma } from '../../../../../lib/prisma';
-
+import type { JWT } from 'next-auth/jwt';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -16,21 +14,18 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.userId || !credentials?.password) return null;
 
-
         const user = await prisma.user.findUnique({
           where: { userId: credentials.userId },
         });
 
-
-        // For production, compare hashed passwords with bcrypt
+        // In production, compare hashed password with bcrypt
         if (user && user.password === credentials.password) {
           return {
             id: user.id,
             name: user.userId,
-            email: null, // Optional
+            email: null,
           };
         }
-
 
         return null;
       },
@@ -40,15 +35,15 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
-        token.id = user.id; // custom field
+        token.id = user.id;
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user && token.id) {
-        (session.user as any).id = token.id;
+        (session.user as { id: string }).id = token.id as string;
       }
       return session;
     },
@@ -57,8 +52,3 @@ export const authOptions: NextAuthOptions = {
     signIn: '/login',
   },
 };
-
-
-
-
-

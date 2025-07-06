@@ -104,24 +104,6 @@ export default function ChatPage() {
     return words.length > 30 ? words.substring(0, 30) + '...' : words;
   };
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const res = await fetch('/api/auth/session');
-      const session = await res.json();
-      console.log('Session info:', session);
-    };
-    checkSession();
-  }, []);
-
-  useEffect(() => {
-    const testSession = async () => {
-      const res = await fetch('/api/session-check');
-      const session = await res.json();
-      console.log('🟢 Current Session:', session);
-    };
-    testSession();
-  }, []);
-
   const createNewConversation = () => {
     setCurrentConversationId(null);
     setMessages([
@@ -278,7 +260,6 @@ export default function ChatPage() {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
-
   return (
     <div className={`h-screen flex ${themeClasses.bg}`}>
       <Sidebar
@@ -299,6 +280,7 @@ export default function ChatPage() {
         theme={theme}
         onThemeChange={setTheme}
       />
+
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className={`border-b px-6 py-4 flex items-center justify-between shadow-sm ${themeClasses.bgSecondary} ${themeClasses.border}`}>

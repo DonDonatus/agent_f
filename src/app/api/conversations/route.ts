@@ -2,9 +2,17 @@ import { prisma } from '../../../../lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]/route';
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+interface ConversationRequestBody {
+  id?: string;
+  title: string;
+  messages: any[]; // Replace `any[]` with your `Message[]` type if available
+}
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -19,18 +27,23 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
+
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const body = await req.json();
+  const body = (await req.json()) as ConversationRequestBody;
   const { id, title, messages } = body;
 
-  const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const timeNow = new Date().toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
   if (id) {
-    // Ensure the conversation belongs to the current user
-    const existing = await prisma.conversation.findUnique({ where: { id } });
+    const existing = await prisma.conversation.findUnique({
+      where: { id },
+    });
 
     if (!existing || existing.userId !== session.user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });

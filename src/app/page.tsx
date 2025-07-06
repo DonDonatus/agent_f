@@ -32,7 +32,7 @@ const getThemeClasses = (theme: Theme): ThemeClasses => {
         textSecondary: 'text-gray-300',
         textMuted: 'text-gray-500',
         hover: 'hover:bg-gray-900',
-        hoverSecondary: 'hover:bg-gray-800'
+        hoverSecondary: 'hover:bg-gray-800',
       };
     case 'dark':
       return {
@@ -44,7 +44,7 @@ const getThemeClasses = (theme: Theme): ThemeClasses => {
         textSecondary: 'text-gray-200',
         textMuted: 'text-gray-400',
         hover: 'hover:bg-gray-800',
-        hoverSecondary: 'hover:bg-gray-700'
+        hoverSecondary: 'hover:bg-gray-700',
       };
     default:
       return {
@@ -56,13 +56,23 @@ const getThemeClasses = (theme: Theme): ThemeClasses => {
         textSecondary: 'text-gray-700',
         textMuted: 'text-gray-500',
         hover: 'hover:bg-gray-50',
-        hoverSecondary: 'hover:bg-gray-100'
+        hoverSecondary: 'hover:bg-gray-100',
       };
   }
 };
 
 // Safe image component with fallback
-const SafeImage = ({ src, alt, fallback: Fallback, className }: { src: string; alt: string; fallback: React.ReactNode; className?: string }) => {
+const SafeImage = ({
+  src,
+  alt,
+  fallback: Fallback,
+  className,
+}: {
+  src: string;
+  alt: string;
+  fallback: React.ReactNode;
+  className?: string;
+}) => {
   const [error, setError] = useState(false);
 
   if (error) {
@@ -106,8 +116,8 @@ export default function SignInPage() {
         if (res.ok) {
           router.push('/chat');
         }
-      } catch (error) {
-        console.error('Auth check failed:', error);
+      } catch (err) {
+        console.error('Auth check failed:', err);
       }
     };
     checkAuth();
@@ -128,7 +138,7 @@ export default function SignInPage() {
       const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, password })
+        body: JSON.stringify({ userId, password }),
       });
 
       const data = await res.json();
@@ -138,9 +148,8 @@ export default function SignInPage() {
         return;
       }
 
-      // Login success
       router.push('/chat');
-    } catch (err) {
+    } catch {
       setError('Authentication failed');
     } finally {
       setIsLoading(false);
@@ -154,7 +163,7 @@ export default function SignInPage() {
 
   return (
     <div className={`min-h-screen flex ${themeClasses.bg} transition-colors duration-300`}>
-      {/* Theme Selector Button */}
+      {/* Theme Selector */}
       <div className="absolute top-6 right-6 z-10">
         <div className="relative">
           <button
@@ -185,7 +194,7 @@ export default function SignInPage() {
         </div>
       </div>
 
-      {/* Left Side - Branding */}
+      {/* Left side branding */}
       <div className="hidden lg:flex lg:flex-1 items-center justify-center p-12">
         <div className="max-w-md text-center">
           <div className="flex justify-center mb-8">
@@ -203,19 +212,16 @@ export default function SignInPage() {
               <div className="absolute -inset-4 bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-3xl blur-xl opacity-20 animate-pulse"></div>
             </div>
           </div>
-          <h1 className={`text-4xl font-bold mb-4 ${themeClasses.text}`}>
-            Welcome to VB Capital
-          </h1>
+          <h1 className={`text-4xl font-bold mb-4 ${themeClasses.text}`}>Welcome to VB Capital</h1>
           <p className={`text-lg leading-relaxed ${themeClasses.textSecondary}`}>
             Your intelligent companion powered by advanced AI. Gain quick access to company information and insight.
           </p>
         </div>
       </div>
 
-      {/* Right Side - Sign In Form */}
+      {/* Right side sign-in */}
       <div className="flex-1 flex items-center justify-center p-8 lg:p-12">
         <div className="w-full max-w-md">
-          {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
             <div className="flex justify-center mb-4">
               <SafeImage
@@ -232,15 +238,10 @@ export default function SignInPage() {
             <h1 className={`text-2xl font-bold ${themeClasses.text}`}>VB Capital</h1>
           </div>
 
-          {/* Sign In Card */}
           <div className={`rounded-2xl shadow-2xl border p-8 ${themeClasses.bgSecondary} ${themeClasses.border}`}>
             <div className="text-center mb-8">
-              <h2 className={`text-2xl font-bold mb-2 ${themeClasses.text}`}>
-                Sign In
-              </h2>
-              <p className={`${themeClasses.textMuted}`}>
-                Enter your credentials to access your account
-              </p>
+              <h2 className={`text-2xl font-bold mb-2 ${themeClasses.text}`}>Sign In</h2>
+              <p className={`${themeClasses.textMuted}`}>Enter your credentials to access your account</p>
             </div>
 
             {error && (
@@ -251,15 +252,13 @@ export default function SignInPage() {
 
             <div className="space-y-6">
               <div>
-                <label className={`block text-sm font-medium mb-2 ${themeClasses.textSecondary}`}>
-                  User ID
-                </label>
+                <label className={`block text-sm font-medium mb-2 ${themeClasses.textSecondary}`}>User ID</label>
                 <input
                   ref={userIdRef}
                   type="text"
                   value={userId}
                   onChange={(e) => setUserId(e.target.value)}
-                  onKeyDown={(e) => {
+                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                     if (e.key === 'Enter') handleSubmit(e);
                   }}
                   className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors ${themeClasses.bgTertiary} ${themeClasses.border} ${themeClasses.text} placeholder-gray-500`}
@@ -269,15 +268,13 @@ export default function SignInPage() {
               </div>
 
               <div>
-                <label className={`block text-sm font-medium mb-2 ${themeClasses.textSecondary}`}>
-                  Password
-                </label>
+                <label className={`block text-sm font-medium mb-2 ${themeClasses.textSecondary}`}>Password</label>
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    onKeyDown={(e) => {
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
                       if (e.key === 'Enter') handleSubmit(e);
                     }}
                     className={`w-full px-4 py-3 pr-12 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors ${themeClasses.bgTertiary} ${themeClasses.border} ${themeClasses.text} placeholder-gray-500`}
@@ -312,9 +309,7 @@ export default function SignInPage() {
             </div>
 
             <div className="mt-8 text-center">
-              <p className={`text-xs ${themeClasses.textMuted}`}>
-                Secure access to VB Capital AI Assistant
-              </p>
+              <p className={`text-xs ${themeClasses.textMuted}`}>Secure access to VB Capital AI Assistant</p>
             </div>
           </div>
         </div>
