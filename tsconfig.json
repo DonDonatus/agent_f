@@ -2,7 +2,11 @@
   "compilerOptions": {
     // Next.js Defaults
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -11,7 +15,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "incremental": true,
     "plugins": [
       {
@@ -20,14 +24,19 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     },
-    
     // Added for script support
     "outDir": "./dist",
     "rootDir": ".",
     "noEmit": false,
-    "types": ["react", "react-dom", "next-auth"]
+    "types": [
+      "react",
+      "react-dom",
+      "next-auth"
+    ]
   },
   "include": [
     "next-env.d.ts",
@@ -39,5 +48,7 @@
     "types",
     "src"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

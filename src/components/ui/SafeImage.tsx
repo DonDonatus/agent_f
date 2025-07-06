@@ -1,13 +1,12 @@
 'use client';
 
-import React, { JSX } from 'react';
-import { useState } from 'react';
+import React, { useState, ReactNode } from 'react';
 import { Building2 } from 'lucide-react';
 
 interface SafeImageProps {
   src: string;
   alt: string;
-  fallback?: React.ReactNode;
+  fallback?: ReactNode;
   className?: string;
 }
 
@@ -16,7 +15,7 @@ export function SafeImage({
   alt,
   fallback = <Building2 className="w-5 h-5" />,
   className,
-}: SafeImageProps): JSX.Element {
+}: SafeImageProps): React.ReactElement {
   const [error, setError] = useState(false);
 
   if (error) {

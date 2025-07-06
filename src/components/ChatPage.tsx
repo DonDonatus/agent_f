@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, User, Menu, Building2, LogOut } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Send, Menu, Building2, LogOut } from 'lucide-react';
 import { Conversation, Message, Theme } from '@/lib/types';
 import { SafeImage } from '@/components/ui/SafeImage';
 import { getThemeClasses } from '@/lib/theme';
