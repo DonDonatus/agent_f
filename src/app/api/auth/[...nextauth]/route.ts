@@ -1,3 +1,5 @@
+// src/app/api/auth/[...nextauth]/route.ts
+
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaClient } from '@prisma/client';
@@ -13,7 +15,7 @@ interface ExtendedUser {
   isAdmin: boolean;
 }
 
-export const authOptions: NextAuthOptions = {
+const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',

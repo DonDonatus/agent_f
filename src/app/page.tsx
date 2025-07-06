@@ -206,7 +206,7 @@ export default function SignInPage() {
           <div className="flex justify-center mb-8">
             <div className="relative">
               <SafeImage
-                src="vb.png"
+                src="/vb.png"
                 alt="VB Capital"
                 className="w-34 h-25 rounded-2xl shadow-2xl"
                 fallback={
@@ -231,7 +231,7 @@ export default function SignInPage() {
           <div className="lg:hidden text-center mb-8">
             <div className="flex justify-center mb-4">
               <SafeImage
-                src="vb.png"
+                src="/vb.png"
                 alt="VB Capital"
                 className="w-16 h-12 rounded-xl"
                 fallback={
