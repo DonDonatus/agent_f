@@ -1,10 +1,13 @@
-// lib/prisma.ts
 import { PrismaClient } from '@prisma/client';
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
+const prismaClientSingleton = () => {
+  return globalThis.__prisma || (globalThis.__prisma = new PrismaClient());
 };
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+declare global {
+  // Avoid "Cannot redeclare block-scoped variable" error
+  // Only adds this type once globally
+  var __prisma: PrismaClient | undefined;
+}
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+export const prisma = prismaClientSingleton();

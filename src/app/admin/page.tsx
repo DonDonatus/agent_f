@@ -2,8 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+interface User {
+  userId: string;
+  createdAt: string;
+}
+
 export default function AdminPage() {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [newUserId, setNewUserId] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [resetUserId, setResetUserId] = useState("");
@@ -18,26 +23,27 @@ export default function AdminPage() {
   useEffect(() => {
     const checkAdminAccess = async () => {
       try {
-        const res = await fetch('/api/check-admin');
-        const data = await res.json();
+        const res = await fetch("/api/check-admin");
+        const data: { isAdmin: boolean } = await res.json();
         if (data.isAdmin) {
           setAuthorized(true);
           fetchUsers();
         } else {
-          router.replace('/chat');
+          router.replace("/chat");
         }
       } catch {
-        router.replace('/chat');
+        router.replace("/chat");
       } finally {
         setLoading(false);
       }
     };
+
     checkAdminAccess();
   }, [router]);
 
   const fetchUsers = async () => {
     const res = await fetch("/api/admin/users");
-    const data = await res.json();
+    const data: User[] = await res.json();
     setUsers(data);
   };
 
@@ -50,16 +56,17 @@ export default function AdminPage() {
       body: JSON.stringify({ userId: newUserId, password: newPassword }),
     });
 
-const data = await res.json().catch(() => null);
+    const data: { success?: boolean; error?: string } | null = await res.json().catch(() => null);
 
     if (!data || !data.success) {
-      setMessage(`❌ ${data?.error || "Failed to reset password"}`);
+      setMessage(`❌ ${data?.error || "Failed to create user"}`);
       return;
     }
 
-    setMessage(`🔐 Password for "${resetUserId}" updated`);
-    setResetUserId("");
-    setResetPassword("");
+    setMessage(`✅ User "${newUserId}" created`);
+    setNewUserId("");
+    setNewPassword("");
+    fetchUsers();
   };
 
   const handleResetPassword = async () => {
@@ -71,7 +78,8 @@ const data = await res.json().catch(() => null);
       body: JSON.stringify({ userId: resetUserId, newPassword: resetPassword }),
     });
 
-    const data = await res.json();
+    const data: { success: boolean; error?: string } = await res.json();
+
     if (data.success) {
       setMessage(`🔐 Password for "${resetUserId}" updated`);
       setResetUserId("");
@@ -87,13 +95,14 @@ const data = await res.json().catch(() => null);
     const confirmed = confirm(`Are you sure you want to delete user "${userId}"?`);
     if (!confirmed) return;
 
-    const res = await fetch(`/api/admin/delete-user`, {
+    const res = await fetch("/api/admin/delete-user", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId }),
     });
 
-    const data = await res.json();
+    const data: { success: boolean; error?: string } = await res.json();
+
     if (data.success) {
       setMessage(`🗑️ User "${userId}" deleted`);
       fetchUsers();
@@ -131,7 +140,7 @@ const data = await res.json().catch(() => null);
       <section className="mb-10">
         <h2 className="text-2xl font-semibold mb-4">👥 All Users</h2>
         <div className="grid gap-4">
-          {users.map((user: any) => (
+          {users.map((user) => (
             <div
               key={user.userId}
               className="border rounded-xl p-4 bg-white shadow-sm flex items-center justify-between"
