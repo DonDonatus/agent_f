@@ -4,6 +4,8 @@ import { X, MessageSquare, Settings, Trash2 } from 'lucide-react';
 import { getThemeClasses } from '@/lib/theme';
 import { SafeImage } from '@/components/ui/SafeImage';
 import type { Conversation, Theme } from '@/lib/types';
+import React from 'react';
+
 
 interface SidebarProps {
   isOpen: boolean;

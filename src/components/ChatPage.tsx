@@ -11,6 +11,8 @@ import { QuestionSuggestions } from './QuestionSuggestions';
 import { ChatMessage } from './ChatMessage';
 import { TypingIndicator } from './TypingIndicator';
 import { useRouter } from 'next/navigation';
+import React from 'react';
+
 
 export default function ChatPage() {
   const router = useRouter();
