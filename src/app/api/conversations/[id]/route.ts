@@ -5,7 +5,13 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function DELETE(req: NextRequest, context: { params: Record<string, string> }) {
+type Context = {
+  params: {
+    id: string;
+  };
+};
+
+export async function DELETE(req: NextRequest, context: Context) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
