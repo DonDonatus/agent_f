@@ -40,7 +40,9 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-  pages: { signIn: '/' },
+  pages: {
+    signIn: '/', // You can update this path if needed
+  },
   callbacks: {
     async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user && token.sub) {
@@ -57,6 +59,8 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
   },
-  session: { strategy: 'jwt' },
+  session: {
+    strategy: 'jwt',
+  },
   secret: process.env.NEXTAUTH_SECRET,
 };
