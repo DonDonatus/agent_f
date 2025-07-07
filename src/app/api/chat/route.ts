@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions'; 
 import type { Session } from 'next-auth';
 
 interface ChatMessage {
@@ -16,8 +16,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const body = await req.json();
-    const { messages } = body as { messages: ChatMessage[] };
+    const { messages }: { messages: ChatMessage[] } = await req.json();
 
     if (!Array.isArray(messages) || !messages.every(msg => msg.role && msg.content)) {
       return NextResponse.json({ error: 'Invalid messages format' }, { status: 400 });
@@ -44,12 +43,14 @@ export async function POST(req: NextRequest) {
 
     const data = await response.json();
 
-    if (!response.ok || !Array.isArray(data) || !data[0]?.generated_text) {
+    const generated = Array.isArray(data) ? data[0]?.generated_text : null;
+
+    if (!response.ok || !generated) {
       console.error('Hugging Face error:', data);
       return NextResponse.json({ error: 'Failed to get valid response from Hugging Face' }, { status: 500 });
     }
 
-    const reply = data[0].generated_text.split('Assistant:').pop()?.trim() || 'No reply.';
+    const reply = generated.split('Assistant:').pop()?.trim() || 'No reply.';
     return NextResponse.json({ content: reply });
 
   } catch (error: unknown) {
