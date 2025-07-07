@@ -1,3 +1,5 @@
+// src/lib/authOptions.ts
+
 import type { NextAuthOptions, Session } from 'next-auth';
 import type { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
