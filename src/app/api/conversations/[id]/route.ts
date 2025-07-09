@@ -6,15 +6,16 @@ import { NextResponse } from 'next/server';
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
-) {
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const conversationId = params.id;
+  // Await the params Promise
+  const { id: conversationId } = await params;
 
   try {
     const existing = await prisma.conversation.findUnique({
