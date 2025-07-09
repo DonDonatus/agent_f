@@ -1,3 +1,5 @@
+// componenets/Sidebar.tsx
+
 'use client';
 import { useState, useEffect } from 'react';
 import { X, MessageSquare, Settings, Trash2 } from 'lucide-react';

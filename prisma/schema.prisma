@@ -1,3 +1,5 @@
+// schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -22,7 +24,7 @@ model User {
 
 model Conversation {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String
+  userId    String  
   title     String
   time      String
   messages  Json

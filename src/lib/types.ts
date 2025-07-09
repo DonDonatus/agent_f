@@ -1,13 +1,14 @@
-// types.ts
+// File: src/lib/types.ts
+
 export type Theme = 'light' | 'dark' | 'very-dark';
 
+export type Role = 'user' | 'assistant';
 
 export interface Message {
-  role: 'user' | 'assistant';
+  role: Role;
   content: string;
   timestamp?: string;
 }
-
 
 export interface Conversation {
   id: string;
@@ -15,7 +16,6 @@ export interface Conversation {
   time: string;
   messages: Message[];
 }
-
 
 export interface ThemeClasses {
   bg: string;
@@ -29,9 +29,8 @@ export interface ThemeClasses {
   hoverSecondary: string;
 }
 
-
 export interface AIResponse {
-  role: string;
+  role: Role;
   content: string;
   document?: {
     fileName: string;
@@ -39,4 +38,3 @@ export interface AIResponse {
     data: string;
   };
 }
-
