@@ -307,42 +307,46 @@ export default function ChatPage() {
         onThemeChange={handleThemeChange}
       />
 
-      <div className="flex-1 flex flex-col min-w-0">
+<div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className={`border-b px-6 py-4 flex items-center justify-between shadow-sm ${themeClasses.cardBg} ${themeClasses.border}`}>
-          <div className="flex items-center gap-4">
+        <header className={`border-b px-3 sm:px-6 py-4 flex items-center justify-between shadow-sm ${themeClasses.cardBg} ${themeClasses.border}`}>
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
             <button onClick={() => setSidebarOpen(true)} className={`p-2 rounded-lg transition-colors ${themeClasses.hoverSecondary} ${themeClasses.focus}`} type="button">
               <Menu className={`w-5 h-5 ${themeClasses.textMuted}`} />
             </button>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <SafeImage
                 src="/vb.png"
                 alt="VB Capital"
-                className="w-9 h-7"
+                className="w-7 h-5 sm:w-9 sm:h-7 flex-shrink-0"
                 theme={theme}
-                fallback={<Building2 className={`w-5 h-5 ${themeClasses.textMuted}`} />}
+                fallback={<Building2 className={`w-4 h-4 sm:w-5 sm:h-5 ${themeClasses.textMuted}`} />}
               />
-              <div>
-                <h1 className={`font-semibold ${themeClasses.text}`}>VB Capital Assistant</h1>
-                <div className="text-sm text-green-600 flex items-center gap-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div className="min-w-0">
+                <h1 className={`font-semibold text-sm sm:text-base truncate ${themeClasses.text}`}>
+                  <span className="sm:hidden">VB Capital Assistant</span>
+                  <span className="hidden sm:inline">VB Capital Assistant</span>
+                </h1>
+                <div className="text-xs sm:text-sm text-green-600 flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full flex-shrink-0"></div>
                   Online
                 </div>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             {isAdmin && (
-              <button onClick={() => router.push('/admin')} className={`text-sm px-4 py-2 rounded-lg transition-colors ${themeClasses.buttonSecondary} ${themeClasses.text}`}>
-                Admin
+              <button onClick={() => router.push('/admin')} className={`text-xs sm:text-sm px-2 sm:px-4 py-2 rounded-lg transition-colors ${themeClasses.buttonSecondary} ${themeClasses.text}`}>
+                <span className="sm:hidden">Admin</span>
+                <span className="hidden sm:inline">Admin</span>
               </button>
             )}
-            <button onClick={handleLogout} className="text-sm px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white flex items-center gap-2 transition-colors shadow">
-              <LogOut className="w-4 h-4" /> Logout
+            <button onClick={handleLogout} className="text-xs sm:text-sm px-2 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white flex items-center gap-1 sm:gap-2 transition-colors shadow">
+              <LogOut className="w-4 h-4 flex-shrink-0" />
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </header>
-
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto px-6 py-6 space-y-0">
           <div className="max-w-4xl mx-auto">
@@ -385,7 +389,7 @@ export default function ChatPage() {
                       sendMessage();
                     }
                   }}
-                  placeholder="Type your message… (Press Enter to send)"
+                  placeholder="Type your message… "
                   rows={1}
                   style={{ minHeight: '56px', maxHeight: '120px' }}
                   disabled={isLoading}
