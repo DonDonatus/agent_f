@@ -20,7 +20,6 @@ export function SafeImage({
   alt,
   fallback = <Building2 className="w-5 h-5" />,
   className = '',
-  theme = 'light'
 }: SafeImageProps) {
   const [error, setError] = useState(false);
 

@@ -1,6 +1,5 @@
 // src/lib/authOptions.ts
 import type { NextAuthOptions } from 'next-auth';
-import type { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '../../lib/prisma';
 
@@ -9,6 +8,21 @@ interface ExtendedUser {
   name: string;
   email: string;
   isAdmin: boolean;
+}
+
+// Extended JWT token interface
+interface ExtendedJWT {
+  sub?: string;
+  isAdmin?: boolean;
+}
+
+// Extended session user interface
+interface ExtendedSessionUser {
+  id?: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  isAdmin?: boolean;
 }
 
 export const authOptions: NextAuthOptions = {
@@ -51,15 +65,21 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.sub = user.id;                         // store userId in token.sub
-        (token as any).isAdmin = (user as ExtendedUser).isAdmin;
+        const extendedToken = token as ExtendedJWT;
+        const extendedUser = user as ExtendedUser;
+        
+        extendedToken.sub = extendedUser.id;                         // store userId in token.sub
+        extendedToken.isAdmin = extendedUser.isAdmin;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user && token.sub) {
-        session.user.id = token.sub;                 // expose userId on session.user.id
-        (session.user as any).isAdmin = (token as any).isAdmin;
+        const extendedSessionUser = session.user as ExtendedSessionUser;
+        const extendedToken = token as ExtendedJWT;
+        
+        extendedSessionUser.id = token.sub;                 // expose userId on session.user.id
+        extendedSessionUser.isAdmin = extendedToken.isAdmin;
       }
       return session;
     },

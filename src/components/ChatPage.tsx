@@ -1,6 +1,5 @@
 'use client';
 
-
 import { useState, useRef, useEffect } from 'react';
 import { Send, Menu, Building2, LogOut, Paperclip } from 'lucide-react';
 import { Conversation, Message, Theme } from '@/lib/types';
@@ -27,11 +26,9 @@ export default function ChatPage() {
   const [isAuthChecking, setIsAuthChecking] = useState<boolean>(true);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
-
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const themeClasses = getThemeClasses(theme);
-
 
   // Load theme
   useEffect(() => {
@@ -40,11 +37,11 @@ export default function ChatPage() {
       setTheme(savedTheme);
     }
   }, []);
+
   const handleThemeChange = (newTheme: Theme) => {
     setTheme(newTheme);
     localStorage.setItem('vb-theme', newTheme);
   };
-
 
   // Auth check
   useEffect(() => {
@@ -67,7 +64,6 @@ export default function ChatPage() {
     checkAuth();
   }, [router]);
 
-
   // Admin flag
   useEffect(() => {
     const checkAdmin = async () => {
@@ -82,7 +78,6 @@ export default function ChatPage() {
     checkAdmin();
   }, []);
 
-
   // Logout sync across tabs
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
@@ -94,8 +89,7 @@ export default function ChatPage() {
     return () => window.removeEventListener('storage', handleStorage);
   }, [router]);
 
-
-  // ** Load conversations **
+  // Load conversations
   useEffect(() => {
     if (isAuthChecking) return;
     const loadConversations = async () => {
@@ -112,12 +106,10 @@ export default function ChatPage() {
     loadConversations();
   }, [isAuthChecking]);
 
-
   // Scroll on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
 
   // Autofocus input
   useEffect(() => {
@@ -127,12 +119,10 @@ export default function ChatPage() {
     return () => clearTimeout(timer);
   }, [messages, isLoading]);
 
-
   const generateConversationTitle = (text: string) => {
     const words = text.split(' ').slice(0, 4).join(' ');
     return words.length > 30 ? words.substring(0, 30) + '...' : words;
   };
-
 
   const createNewConversation = () => {
     setCurrentConversationId(null);
@@ -147,7 +137,6 @@ export default function ChatPage() {
     setSidebarOpen(false);
   };
 
-
   const selectConversation = (id: string) => {
     const conv = conversations.find((c) => c.id === id);
     if (conv) {
@@ -157,7 +146,6 @@ export default function ChatPage() {
     }
   };
 
-
   const updateConversationMessages = (id: string, newMessages: Message[]) => {
     setConversations((prev) =>
       prev.map((conv) =>
@@ -166,20 +154,16 @@ export default function ChatPage() {
     );
   };
 
-
   const sendFeedback = (msg: Message, fb: 'helpful' | 'not-helpful') => {
     console.log(`Feedback: ${fb} for message:`, msg);
   };
 
-
-  // ** Send & persist **
   const sendMessage = async (messageText?: string, file?: File): Promise<void> => {
     const text = messageText || input;
     if (!text.trim() && !file) return;
 
-
     // Build user message
-    let userMessage: Message = {
+    const userMessage: Message = {
       role: 'user',
       content: file
         ? `📎 Uploaded file: ${file.name}${text ? `\n\n${text}` : ''}`
@@ -187,22 +171,23 @@ export default function ChatPage() {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
-
     // Handle file upload
+    let updatedUserMessage = userMessage;
     if (file) {
       const formData = new FormData();
       formData.append('file', file);
       const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData });
       const { url } = await uploadRes.json();
-      userMessage.content = `[file:${file.name}](${url})${text ? `\n\n${text}` : ''}`;
+      updatedUserMessage = {
+        ...userMessage,
+        content: `[file:${file.name}](${url})${text ? `\n\n${text}` : ''}`,
+      };
     }
 
-
-    const newMessages = [...messages, userMessage];
+    const newMessages = [...messages, updatedUserMessage];
     setMessages(newMessages);
     setInput('');
     setIsLoading(true);
-
 
     // Call AI
     let aiMessage: Message;
@@ -231,51 +216,46 @@ export default function ChatPage() {
       };
     }
 
-
     const finalMessages = [...newMessages, aiMessage];
     setMessages(finalMessages);
 
-
     // Persist to /api/conversations
-    const title = generateConversationTitle(text);
-try {
-  if (currentConversationId) {
-    // ─── UPDATE EXISTING ────────────────────────────────────────────
-    // Don't overwrite the title after the first message
-    await fetch('/api/conversations', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id: currentConversationId,
-        messages: finalMessages,
-      }),
-    });
-    updateConversationMessages(currentConversationId, finalMessages);
-  } else {
-    // ─── CREATE NEW ───────────────────────────────────────────────
-    // Compute title only once, for the very first question
-    const title = generateConversationTitle(text);
-    const createRes = await fetch('/api/conversations', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title,
-        messages: finalMessages,
-      }),
-    });
-    const { id } = await createRes.json();
-    setCurrentConversationId(id);
+    try {
+      if (currentConversationId) {
+        // Update existing conversation
+        await fetch('/api/conversations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: currentConversationId,
+            messages: finalMessages,
+          }),
+        });
+        updateConversationMessages(currentConversationId, finalMessages);
+      } else {
+        // Create new conversation
+        const conversationTitle = generateConversationTitle(text);
+        const createRes = await fetch('/api/conversations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: conversationTitle,
+            messages: finalMessages,
+          }),
+        });
+        const { id } = await createRes.json();
+        setCurrentConversationId(id);
 
-    // Refresh sidebar list
-    const all = await fetch('/api/conversations');
-    if (all.ok) setConversations(await all.json());
-  }
-} catch (saveError) {
-  console.error('Failed to save conversation:', saveError);
-} finally {
-  setIsLoading(false);
-}  };
-
+        // Refresh sidebar list
+        const all = await fetch('/api/conversations');
+        if (all.ok) setConversations(await all.json());
+      }
+    } catch (saveError) {
+      console.error('Failed to save conversation:', saveError);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     await fetch('/api/logout', { method: 'POST' });
@@ -283,7 +263,6 @@ try {
     window.dispatchEvent(new Event('storage'));
     router.push('/');
   };
-
 
   const handleDeleteConversation = async (id: string) => {
     const res = await fetch(`/api/conversations/${id}`, { method: 'DELETE' });
@@ -296,7 +275,6 @@ try {
     }
   };
 
-
   if (isAuthChecking) {
     return (
       <div className={`flex items-center justify-center h-screen ${themeClasses.bg} ${themeClasses.text}`}>
@@ -307,7 +285,6 @@ try {
       </div>
     );
   }
-
 
   return (
     <div className={`h-screen flex ${themeClasses.bg}`}>
@@ -323,14 +300,12 @@ try {
         theme={theme}
       />
 
-
       <SettingsModal
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
         theme={theme}
         onThemeChange={handleThemeChange}
       />
-
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
@@ -368,7 +343,6 @@ try {
           </div>
         </header>
 
-
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto px-6 py-6 space-y-0">
           <div className="max-w-4xl mx-auto">
@@ -380,12 +354,10 @@ try {
           </div>
         </div>
 
-
         {/* Chat Input Section */}
         <div className={`border-t px-6 py-4 ${themeClasses.cardBg} ${themeClasses.border}`}>
           <div className="max-w-4xl mx-auto">
             {messages.length <= 1 && <QuestionSuggestions onSelectQuestion={sendMessage} conversations={conversations} theme={theme} />}
-
 
             <div className="flex gap-3 items-end">
               <div className="flex-1 relative">
@@ -418,7 +390,6 @@ try {
                   style={{ minHeight: '56px', maxHeight: '120px' }}
                   disabled={isLoading}
                 />
-
 
                 <input
                   type="file"

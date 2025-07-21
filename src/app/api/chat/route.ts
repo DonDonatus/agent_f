@@ -101,6 +101,23 @@ interface Message {
   content: string;
 }
 
+// Type definitions for Gemini API response structure
+interface GeminiContentPart {
+  text?: string;
+}
+
+interface GeminiContent {
+  parts?: GeminiContentPart[];
+}
+
+interface GeminiCandidate {
+  content?: GeminiContent;
+}
+
+interface GeminiResponse {
+  candidates?: GeminiCandidate[];
+}
+
 export async function POST(req: NextRequest) {
   // ——— Authenticate & verify user still exists —————
   const token = await getToken({ req, secret: SECRET });
@@ -140,25 +157,24 @@ export async function POST(req: NextRequest) {
 
     // Call Gemini
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-    const chat  = model.startChat();
+    const chat = model.startChat();
     const result = await chat.sendMessage(fullPrompt);
 
-    // Extract reply
-    const candidates = Array.isArray((result.response as any).candidates)
-      ? (result.response as any).candidates
-      : [];
-    let raw =
-      candidates[0]?.content?.parts?.[0]?.text ??
-      'Sorry, I could not generate a response.';
+    // Extract reply with proper typing
+    const response = result.response as GeminiResponse;
+    const candidates = Array.isArray(response.candidates) ? response.candidates : [];
+    
+    const raw = candidates[0]?.content?.parts?.[0]?.text ?? 'Sorry, I could not generate a response.';
 
     // Strip any leading "Assistant: " tag
     const text = raw.replace(/^\s*Assistant:\s*/i, '');
 
     return NextResponse.json({ content: text });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('🛑 /api/chat error:', err);
+    const errorMessage = err instanceof Error ? err.message : 'Error processing your request';
     return NextResponse.json(
-      { error: err.message || 'Error processing your request' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

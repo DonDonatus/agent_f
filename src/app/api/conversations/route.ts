@@ -11,6 +11,8 @@ interface Message {
   timestamp: string;
 }
 
+
+
 export async function GET(req: NextRequest) {
   console.log('🧩 cookie header:', req.headers.get('cookie'));
 
@@ -79,18 +81,18 @@ export async function POST(req: NextRequest) {
 
     if (id) {
       // ─── UPDATE EXISTING ───────────────────────────────────────────
-      const data: any = {
+      const updateData: Record<string, unknown> = {
         messages: JSON.parse(JSON.stringify(messages)),
         time: now,
       };
       // only overwrite title if provided (i.e., on first create or explicit change)
       if (title) {
-        data.title = title;
+        updateData.title = title;
       }
 
       await prisma.conversation.update({
         where: { id },
-        data,
+        data: updateData,
       });
 
       return NextResponse.json({ id });
