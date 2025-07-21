@@ -88,48 +88,71 @@ export function Sidebar({
                 Recent Conversations
               </h3>
               <div className="space-y-2">
-                {conversations.map((conv) => (
-                  <div
-                    key={conv.id}
-                    className={`group flex items-center justify-between p-3 rounded-lg transition-colors ${
-                      currentConversationId === conv.id
-                        ? 'bg-emerald-100 border border-emerald-600'
-                        : themeClasses.hover
-                    }`}
-                  >
+                {conversations.map((conv) => {
+                  const isActive = currentConversationId === conv.id;
+
+                  return (
                     <div
-                      className="flex-1 cursor-pointer"
-                      onClick={() => {
-                        onSelectConversation(conv.id);
-                        onClose();
-                      }}
-                    >
-                      <div className={`font-medium text-sm truncate ${themeClasses.textSecondary}`}>
-                        {conv.title}
-                      </div>
-                      <div className={`text-xs mt-1 ${themeClasses.textMuted}`}>{conv.time}</div>
-                    </div>
-                    <button
-                      onClick={() => {
-                        if (confirm('Delete this conversation?')) {
-                          onDeleteConversation(conv.id);
+                      key={conv.id}
+                      className={`
+                        group flex items-center justify-between p-3 rounded-lg transition-colors
+                        ${
+                          isActive
+                            ? 'bg-emerald-100 border border-emerald-600'
+                            : themeClasses.hover
                         }
-                      }}
-                      className="ml-2 opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 transition"
-                      title="Delete"
+                      `}
                     >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className={`text-center py-8 ${themeClasses.textMuted}`}>
-              No conversations yet
+                      <div
+                        className="flex-1 cursor-pointer"
+                        onClick={() => {
+                          onSelectConversation(conv.id);
+                          onClose();
+                        }}
+                      >
+                        {/* Title: darker when active */}
+                        <div
+                          className={`
+                            font-medium text-sm truncate
+                            ${isActive ? 'text-emerald-900' : themeClasses.textSecondary}
+                          `}
+                        >
+                          {conv.title}
+                        </div>
+
+                        {/* Timestamp: darker when active */}
+                        <div
+                          className={`
+                            text-xs mt-1
+                            ${isActive ? 'text-emerald-700' : themeClasses.textMuted}
+                          `}
+                        >
+                          {conv.time}
+                        </div>
+                      </div>
+
+              <button
+                onClick={() => {
+                  if (confirm('Delete this conversation?')) {
+                    onDeleteConversation(conv.id);
+                  }
+                }}
+                className="ml-2 opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-700 transition"
+                title="Delete"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
             </div>
-          )}
-        </div>
+          );
+        })}
+      </div>
+    </>
+  ) : (
+    <div className={`text-center py-8 ${themeClasses.textMuted}`}>
+      No conversations yet
+    </div>
+  )}
+</div>
 
         {/* Settings */}
         <div className={`p-4 border-t ${themeClasses.border}`}>

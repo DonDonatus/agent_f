@@ -1,11 +1,8 @@
 // src/lib/authOptions.ts
-
-import type { NextAuthOptions, Session } from 'next-auth';
+import type { NextAuthOptions } from 'next-auth';
 import type { JWT } from 'next-auth/jwt';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../../lib/prisma';
 
 interface ExtendedUser {
   id: string;
@@ -34,7 +31,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         return {
-          id: user.userId, // ✅ Ensure userId is used (matches Conversation.userId)
+          id: user.userId,            // use userId as the session ID
           name: user.userId,
           email: `${user.userId}@example.com`,
           isAdmin: user.isAdmin,
@@ -42,27 +39,31 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
+
   pages: {
-    signIn: '/', // login page
+    signIn: '/', // your custom login page
   },
+
+  session: {
+    strategy: 'jwt',
+  },
+
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.sub = user.id; // ✅ Store userId in token.sub
-        token.isAdmin = (user as ExtendedUser).isAdmin;
+        token.sub = user.id;                         // store userId in token.sub
+        (token as any).isAdmin = (user as ExtendedUser).isAdmin;
       }
       return token;
     },
-    async session({ session, token }: { session: Session; token: JWT }) {
+    async session({ session, token }) {
       if (session.user && token.sub) {
-        session.user.id = token.sub; // ✅ Retrieve userId for session
-        (session.user as typeof session.user & { isAdmin?: boolean }).isAdmin = token.isAdmin;
+        session.user.id = token.sub;                 // expose userId on session.user.id
+        (session.user as any).isAdmin = (token as any).isAdmin;
       }
       return session;
     },
   },
-  session: {
-    strategy: 'jwt',
-  },
+
   secret: process.env.NEXTAUTH_SECRET,
 };

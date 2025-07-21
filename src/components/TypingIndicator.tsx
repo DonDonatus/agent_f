@@ -1,3 +1,5 @@
+// src/components/TypingIndicator.tsx
+
 'use client';
 
 import React from 'react';

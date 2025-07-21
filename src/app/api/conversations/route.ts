@@ -1,90 +1,113 @@
 // src/app/api/conversations/route.ts
-
+import { NextRequest, NextResponse } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 import { prisma } from '../../../../lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/authOptions';
-import { NextResponse } from 'next/server';
-import type { Prisma } from '@prisma/client';
+
+const SECRET = process.env.NEXTAUTH_SECRET!;
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
-  timestamp?: string;
+  timestamp: string;
 }
 
-interface ConversationRequestBody {
-  id?: string;
-  title: string;
-  messages: Message[];
-}
+export async function GET(req: NextRequest) {
+  console.log('🧩 cookie header:', req.headers.get('cookie'));
 
-export async function GET() {
-  const session = await getServerSession(authOptions);
+  // 1) Try NextAuth token
+  const token = await getToken({ req, secret: SECRET });
+  console.log('🧩 parsed JWT token:', token);
 
-  if (!session?.user?.id) {
+  // 2) Fallback to your test cookie "userId"
+  const fallbackUser = req.cookies.get('userId')?.value;
+  const userId = token?.sub ?? fallbackUser;
+
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // 3) Verify the user still exists
+  const account = await prisma.user.findUnique({ where: { userId } });
+  if (!account) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    const conversations = await prisma.conversation.findMany({
-      where: { userId: session.user.id },
+    const convs = await prisma.conversation.findMany({
+      where: { userId },
       orderBy: { updatedAt: 'desc' },
+      select: { id: true, title: true, time: true, messages: true },
     });
-
-    return NextResponse.json(conversations);
-  } catch (error) {
-    console.error('GET /conversations error:', error);
-    return NextResponse.json({ error: 'Failed to fetch conversations' }, { status: 500 });
+    return NextResponse.json(convs);
+  } catch (err) {
+    console.error('GET /api/conversations error:', err);
+    return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
   }
 }
 
-export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
+export async function POST(req: NextRequest) {
+  console.log('🧩 cookie header:', req.headers.get('cookie'));
 
-  if (!session?.user?.id) {
+  // 1) Authenticate
+  const token = await getToken({ req, secret: SECRET });
+  console.log('🧩 parsed JWT token:', token);
+  const fallbackUser = req.cookies.get('userId')?.value;
+  const userId = token?.sub ?? fallbackUser;
+
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // 2) Verify the user still exists
+  const account = await prisma.user.findUnique({ where: { userId } });
+  if (!account) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    const body = (await req.json()) as ConversationRequestBody;
-    const { id, title, messages } = body;
+    // title is now optional on updates
+    const { id, title, messages } = (await req.json()) as {
+      id?: string;
+      title?: string;
+      messages: Message[];
+    };
 
-    const timeNow = new Date().toLocaleTimeString([], {
+    const now = new Date().toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
     });
 
-    const messagesJson: Prisma.InputJsonValue = messages?.length
-      ? JSON.parse(JSON.stringify(messages))
-      : [];
-
     if (id) {
-      const existing = await prisma.conversation.findUnique({ where: { id } });
-
-      if (!existing || existing.userId !== session.user.id) {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      // ─── UPDATE EXISTING ───────────────────────────────────────────
+      const data: any = {
+        messages: JSON.parse(JSON.stringify(messages)),
+        time: now,
+      };
+      // only overwrite title if provided (i.e., on first create or explicit change)
+      if (title) {
+        data.title = title;
       }
 
-      const updated = await prisma.conversation.update({
+      await prisma.conversation.update({
         where: { id },
-        data: { title, messages: messagesJson, time: timeNow },
+        data,
       });
 
-      return NextResponse.json({ id: updated.id });
+      return NextResponse.json({ id });
+    } else {
+      // ─── CREATE NEW ───────────────────────────────────────────────
+      const conv = await prisma.conversation.create({
+        data: {
+          userId,
+          title: title ?? 'New Conversation',
+          messages: JSON.parse(JSON.stringify(messages)),
+          time: now,
+        },
+      });
+      return NextResponse.json({ id: conv.id });
     }
-
-    const newConv = await prisma.conversation.create({
-      data: {
-        userId: session.user.id,
-        title,
-        messages: messagesJson,
-        time: timeNow,
-      },
-    });
-
-    return NextResponse.json({ id: newConv.id });
-  } catch (error) {
-    console.error('POST /conversations error:', error);
-    return NextResponse.json({ error: 'Failed to save conversation' }, { status: 500 });
+  } catch (err) {
+    console.error('POST /api/conversations error:', err);
+    return NextResponse.json({ error: 'Failed to save' }, { status: 500 });
   }
 }
