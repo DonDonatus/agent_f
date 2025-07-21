@@ -5,10 +5,14 @@ import { prisma } from '../../../../../lib/prisma';
 
 const SECRET = process.env.NEXTAUTH_SECRET!;
 
-interface Context { params: { id: string } }
-
-export async function GET(req: NextRequest, { params }: Context) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   console.log('🧩 cookie header:', req.headers.get('cookie'));
+
+  // Await params as required by Next.js 15+
+  const { id } = await params;
 
   // 1) Authenticate
   const token = await getToken({ req, secret: SECRET });
@@ -28,7 +32,7 @@ export async function GET(req: NextRequest, { params }: Context) {
 
   // 3) Fetch the conversation, scoped to this user
   const conv = await prisma.conversation.findFirst({
-    where: { id: params.id, userId },
+    where: { id, userId },
     select: { id: true, title: true, time: true, messages: true },
   });
 
@@ -39,8 +43,14 @@ export async function GET(req: NextRequest, { params }: Context) {
   return NextResponse.json(conv);
 }
 
-export async function DELETE(req: NextRequest, { params }: Context) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   console.log('🧩 cookie header:', req.headers.get('cookie'));
+
+  // Await params as required by Next.js 15+
+  const { id } = await params;
 
   // 1) Authenticate
   const token = await getToken({ req, secret: SECRET });
@@ -60,7 +70,7 @@ export async function DELETE(req: NextRequest, { params }: Context) {
 
   // 3) Delete only if it belongs to this user
   await prisma.conversation.deleteMany({
-    where: { id: params.id, userId },
+    where: { id, userId },
   });
 
   return NextResponse.json({ success: true });
